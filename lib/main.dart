@@ -28,6 +28,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   int _counter = 0;
+  int _goal = 100;
   bool _isDark = false;
   bool _isFirstImage = true;
 
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
     );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 5));
   }
 
   @override
@@ -54,7 +55,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _incrementCounter(int value) {
-    setState(() => _counter += value);
+    setState(() {
+      _counter += value;
+      if (_counter >= _goal) _confettiController.play();
+    });
   }
 
   void _toggleTheme() {
@@ -86,15 +90,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
           ],
         ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Counter: $_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
+        body: Stack(
+          children: [
+            ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: 3.14159 / 2, // Downward
+              blastDirectionality: BlastDirectionality.explosive, // Spread across screen
+              shouldLoop: false,
+              colors: const [Colors.red, Colors.blue, Colors.green],
+              emissionFrequency: 0.1,
+              numberOfParticles: 50,
+            ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Counter: $_counter',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  LinearProgressIndicator(value: _counter / _goal.clamp(1, double.infinity)),
+                  const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -120,9 +137,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 onPressed: _toggleImage,
                 child: const Text('Toggle Image'),
               ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: 200,
+                child: TextField(
+                  controller: TextEditingController(text: _goal.toString()),
+                  onChanged: (value) => setState(() => _goal = int.tryParse(value) ?? 100),
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Goal'),
+                ),
+              ),
             ],
           ),
         ),
+      ],
+    ),
       ),
     );
   }
