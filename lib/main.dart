@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:confetti/confetti.dart';
 
 void main() {
   runApp(const CounterImageToggleApp());
@@ -32,6 +33,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   late final AnimationController _controller;
   late final Animation<double> _fade;
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
@@ -41,16 +43,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       vsync: this,
     );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
-  void _incrementCounter() {
-    setState(() => _counter++);
+  void _incrementCounter(int value) {
+    setState(() => _counter += value);
   }
 
   void _toggleTheme() {
@@ -91,9 +95,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: _incrementCounter,
-                child: const Text('Increment'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(onPressed: () => _incrementCounter(1), child: const Text('+1')),
+                  const SizedBox(width: 8),
+                  ElevatedButton(onPressed: () => _incrementCounter(5), child: const Text('+5')),
+                  const SizedBox(width: 8),
+                  ElevatedButton(onPressed: () => _incrementCounter(10), child: const Text('+10')),
+                ],
               ),
               const SizedBox(height: 24),
               FadeTransition(
