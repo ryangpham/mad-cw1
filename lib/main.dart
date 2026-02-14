@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _confettiController = ConfettiController(duration: const Duration(seconds: 5));
+    _controller.value = 1.0;
   }
 
   @override
@@ -65,13 +66,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     setState(() => _isDark = !_isDark);
   }
 
-  void _toggleImage() {
-    if (_isFirstImage) {
-      _controller.forward();
-    } else {
-      _controller.reverse();
-    }
-    setState(() => _isFirstImage = !_isFirstImage);
+  void _toggleImage() async {
+    // Fade OUT
+    await _controller.reverse();
+
+    // Swap image
+    setState(() {
+      _isFirstImage = !_isFirstImage;
+    });
+
+    // Fade IN
+    await _controller.forward();
   }
 
   @override
@@ -126,7 +131,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               FadeTransition(
                 opacity: _fade,
                 child: Image.asset(
-                  _isFirstImage ? 'assets/image1.png' : 'assets/image2.png',
+                  _isFirstImage ? 'assets/happy.jpg' : 'assets/frown.jpg',
                   width: 180,
                   height: 180,
                   fit: BoxFit.cover,
